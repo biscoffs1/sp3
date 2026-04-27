@@ -57,7 +57,7 @@
         }
         #thumbnail-container {
             flex-grow: 1;
-            padding: 20px;
+            padding: 0;
             position: relative;
             overflow: auto;
             min-width: 0;
@@ -137,25 +137,25 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            width: fit-content;
-            min-width: 100%;
+            width: 100%;
         }
         .thumbnails-container {
             display: flex;
             flex-wrap: wrap;
             align-items: stretch;
             position: relative;
-            width: fit-content;
+            padding: 10px 20px;
         }
         .row-action-bar {
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            padding: 4px 10px;
+            padding: 4px 20px;
             background-color: var(--toolbar-color);
             width: 100%;
             box-sizing: border-box;
             border-bottom: 1px solid #444444;
+            border-top: 1px solid #444444;
         }
         .row-action-group-left {
             display: flex;
@@ -176,6 +176,9 @@
             align-items: center;
             justify-content: center;
             margin-right: 10px;
+            background-color: white;
+            border-radius: 4px;
+            padding: 0 4px;
         }
         .delete-cross:hover {
             opacity: 1;
@@ -295,7 +298,7 @@
             font-weight: bold;
             margin-top: 20px;
             margin-bottom: 0;
-            padding-bottom: 5px;
+            padding: 5px 20px;
             display: flex;
             justify-content: flex-start;
             align-items: center;
@@ -1139,16 +1142,16 @@
                 const btn = document.createElement('button');
                 btn.className = 'bar-button row-bar-btn';
 
-                const circle = document.createElement('span');
-                circle.className = 'color-circle';
                 if (color) {
+                    const circle = document.createElement('span');
+                    circle.className = 'color-circle';
                     if (color.startsWith('--')) {
                         circle.style.backgroundColor = 'var(' + color + ')';
                     } else {
                         circle.style.backgroundColor = color;
                     }
+                    btn.appendChild(circle);
                 }
-                btn.appendChild(circle);
                 btn.appendChild(document.createTextNode(text));
 
                 if (type) btn.dataset.type = type;
@@ -1188,12 +1191,12 @@
                 updateRowUI(rowDiv, videoName, projectPath);
             };
 
-            leftGroup.appendChild(createBtn('Rotate Left', () => rotate(-90), null, '#ff8800'));
-            leftGroup.appendChild(createBtn('Rotate Right', () => rotate(90), null, '#ff8800'));
+            leftGroup.appendChild(createBtn('Rotate Left', () => rotate(-90)));
+            leftGroup.appendChild(createBtn('Rotate Right', () => rotate(90)));
             leftGroup.appendChild(createBtn('Both', () => setType('both-sc'), 'both-sc', '--both-sc-color'));
             leftGroup.appendChild(createBtn('Subfolder', () => setType('subfolder-sc'), 'subfolder-sc', '--subfolder-sc-color'));
             leftGroup.appendChild(createBtn('Root', () => setType('root-sc'), 'root-sc', '--root-sc-color'));
-            leftGroup.appendChild(createBtn('Rotate 180°', () => rotate(180), null, '#ff8800'));
+            leftGroup.appendChild(createBtn('Rotate 180°', () => rotate(180)));
 
             bar.appendChild(leftGroup);
             return bar;
@@ -2153,8 +2156,8 @@
                     rowHeaderText.textContent = videoFile.name;
                     rowHeader.appendChild(rowHeaderText);
 
-                    rowDiv.prepend(createRowActionBar(videoFile.name, project.path, videoFile.subfolder, rowDiv));
                     rowDiv.prepend(rowHeader);
+                    rowDiv.appendChild(createRowActionBar(videoFile.name, project.path, videoFile.subfolder, rowDiv));
                     const dateInfo = document.createElement('div');
                     dateInfo.className = 'date-info';
                     dateInfo.textContent = `Created: ${new Date(videoFile.lastModified).toLocaleString()}`;
@@ -2394,11 +2397,11 @@
                             rowHeader.appendChild(rowHeaderText);
 
                             rowDiv.appendChild(rowHeader);
-                            rowDiv.appendChild(createRowActionBar(videoBaseName, subfolderName, '', rowDiv));
 
                             const thumbnailsContainer = document.createElement('div');
                             thumbnailsContainer.className = 'thumbnails-container';
                             rowDiv.appendChild(thumbnailsContainer);
+                            rowDiv.appendChild(createRowActionBar(videoBaseName, subfolderName, '', rowDiv));
 
                             canvasElements.push(rowDiv);
                             updateRowUI(rowDiv, videoBaseName, subfolderName);
@@ -2755,8 +2758,8 @@
                     rowHeaderText.textContent = 'Playlist Item';
                     rowHeader.appendChild(rowHeaderText);
 
-                    rowDiv.prepend(createRowActionBar('playlist_entry', project.path, candidateVideos[currentIndex].subfolder, rowDiv));
                     rowDiv.prepend(rowHeader);
+                    rowDiv.appendChild(createRowActionBar('playlist_entry', project.path, candidateVideos[currentIndex].subfolder, rowDiv));
 
                     updateRowUI(rowDiv, 'playlist_entry', project.path);
 
