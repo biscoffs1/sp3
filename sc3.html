@@ -151,9 +151,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 5px 0;
-            margin-top: 5px;
-            background-color: rgba(0, 0, 0, 0.2);
+            padding: 0;
+            background-color: transparent;
             width: 100%;
             box-sizing: border-box;
         }
@@ -165,18 +164,17 @@
             display: flex;
         }
         .delete-cross {
-            font-size: 80px;
+            font-size: 1.2em;
             color: var(--delete-sc-color);
             cursor: pointer;
             line-height: 1;
             user-select: none;
             opacity: 0.3;
             transition: opacity 0.2s;
-            margin-left: 20px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            height: 100%;
+            margin-right: 5px;
         }
         .delete-cross:hover {
             opacity: 1;
@@ -299,8 +297,14 @@
             border-bottom: 1px solid #ccc;
             padding-bottom: 5px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
+            gap: 15px;
+        }
+        .header-controls {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
         }
         .date-info {
             display: none;
@@ -918,14 +922,17 @@
             if (rotateScBtn) rotateScBtn.addEventListener('click', () => setSelectionType('rotate-sc'));
             if (playBtn) playBtn.addEventListener('click', () => setSelectionType('play'));
 
-            closeVideoModal.addEventListener('click', () => {
+            const closeModal = () => {
                 videoModal.style.display = 'none';
                 player.pause();
                 if (currentVideoUrl) {
                     URL.revokeObjectURL(currentVideoUrl);
                     currentVideoUrl = null;
                 }
-            });
+            };
+
+            closeVideoModal.addEventListener('click', closeModal);
+            player.addEventListener('click', closeModal);
 
             deleteShortcutsBtn.addEventListener('click', () => {
                 if (shortcutSelections.size === 0) {
@@ -1124,7 +1131,7 @@
             layoutLandscapeThumbnails();
         }
 
-        function createRowActionBar(videoName, projectPath, subfolder) {
+        function createRowActionBar(videoName, projectPath, subfolder, rowDiv) {
             const bar = document.createElement('div');
             bar.className = 'row-action-bar';
 
@@ -1157,7 +1164,7 @@
                 let currentRot = parseInt(selection.rotation || "0");
                 let newRot = (currentRot + delta + 360) % 360;
                 selection.rotation = newRot.toString();
-                updateRowUI(bar.parentElement, videoName, projectPath);
+                updateRowUI(rowDiv, videoName, projectPath);
             };
 
             const setType = (type) => {
@@ -1172,7 +1179,7 @@
                         selection.type = type;
                     }
                 }
-                updateRowUI(bar.parentElement, videoName, projectPath);
+                updateRowUI(rowDiv, videoName, projectPath);
             };
 
             leftGroup.appendChild(createBtn('Rotate Left', () => rotate(-90)));
@@ -1188,7 +1195,7 @@
             return bar;
         }
 
-        function createDeleteCross(videoName, projectPath, subfolder) {
+        function createDeleteCross(videoName, projectPath, subfolder, rowDiv) {
             const cross = document.createElement('div');
             cross.className = 'delete-cross';
             cross.innerHTML = '&times;';
@@ -1207,7 +1214,7 @@
                         selection.type = 'delete-sc';
                     }
                 }
-                updateRowUI(cross.parentElement, videoName, projectPath);
+                updateRowUI(rowDiv, videoName, projectPath);
             };
             return cross;
         }
@@ -2107,28 +2114,46 @@
                     continue;
                 }
 
-                const header = document.createElement('h2');
-                header.className = 'project-header';
-                const headerText = document.createElement('span');
+                const groupHeader = document.createElement('h2');
+                groupHeader.className = 'project-header';
+                const groupHeaderText = document.createElement('span');
                 const projectPrefix = (currentMode === 'root-sc' || currentMode === 'sc') ? 'Root Shortcuts: ' : '';
-                headerText.textContent = `${projectPrefix}${project.name} (${projectRows.length} ${projectRows.length === 1 ? 'video' : 'videos'})`;
-                header.appendChild(headerText);
+                groupHeaderText.textContent = `${projectPrefix}${project.name} (${projectRows.length} ${projectRows.length === 1 ? 'video' : 'videos'})`;
+                groupHeader.appendChild(groupHeaderText);
 
                 if (isNewOnly) {
                     const headerDateInfo = document.createElement('span');
                     headerDateInfo.className = 'date-info';
                     headerDateInfo.textContent = `Last Shortcut: ${new Date(mostRecentShortcutTime).toLocaleString()}`;
-                    header.appendChild(headerDateInfo);
+                    groupHeader.appendChild(headerDateInfo);
                 } else if (currentMode === 'update-playlist-root' && playlistCreationTime) {
                     const headerDateInfo = document.createElement('span');
                     headerDateInfo.className = 'date-info';
                     headerDateInfo.textContent = `Playlist Cutoff: ${new Date(playlistCreationTime).toLocaleString()}`;
-                    header.appendChild(headerDateInfo);
+                    groupHeader.appendChild(headerDateInfo);
                 }
-                canvasElements.push(header);
+                canvasElements.push(groupHeader);
 
                 for (const rowData of projectRows) {
                     const { rowDiv, videoFile, files, hasProjectSc, hasRootSc, rootScEntry } = rowData;
+
+                    const rowHeader = document.createElement('h3');
+                    rowHeader.className = 'project-header';
+                    rowHeader.style.fontSize = '1em';
+                    rowHeader.style.marginTop = '10px';
+
+                    rowHeader.appendChild(createDeleteCross(videoFile.name, project.path, videoFile.subfolder, rowDiv));
+
+                    const rowHeaderText = document.createElement('span');
+                    rowHeaderText.textContent = videoFile.name;
+                    rowHeader.appendChild(rowHeaderText);
+
+                    const controlsContainer = document.createElement('div');
+                    controlsContainer.className = 'header-controls';
+                    controlsContainer.appendChild(createRowActionBar(videoFile.name, project.path, videoFile.subfolder, rowDiv));
+                    rowHeader.appendChild(controlsContainer);
+
+                    rowDiv.prepend(rowHeader);
                     const dateInfo = document.createElement('div');
                     dateInfo.className = 'date-info';
                     dateInfo.textContent = `Created: ${new Date(videoFile.lastModified).toLocaleString()}`;
@@ -2194,9 +2219,6 @@
                         shortcutSelections.set(key, selectionData);
                         initialShortcutSelections.set(key, { type: initialShortcutType, rotation: rotation });
                     }
-
-                    rowDiv.appendChild(createRowActionBar(videoFile.name, project.path, videoFile.subfolder));
-                    thumbnailsContainer.appendChild(createDeleteCross(videoFile.name, project.path, videoFile.subfolder));
 
                     canvasElements.push(rowDiv);
                     updateRowUI(rowDiv, videoFile.name, project.path);
@@ -2360,12 +2382,23 @@
                                 }
                             }
 
+                            const rowHeader = document.createElement('h3');
+                            rowHeader.className = 'project-header';
+                            rowHeader.style.fontSize = '1em';
+                            rowHeader.style.marginTop = '10px';
+                            rowHeader.appendChild(createDeleteCross(videoBaseName, subfolderName, '', rowDiv));
+                            const rowHeaderText = document.createElement('span');
+                            rowHeaderText.textContent = videoBaseName;
+                            rowHeader.appendChild(rowHeaderText);
+                            const controlsContainer = document.createElement('div');
+                            controlsContainer.className = 'header-controls';
+                            controlsContainer.appendChild(createRowActionBar(videoBaseName, subfolderName, '', rowDiv));
+                            rowHeader.appendChild(controlsContainer);
+                            rowDiv.appendChild(rowHeader);
+
                             const thumbnailsContainer = document.createElement('div');
                             thumbnailsContainer.className = 'thumbnails-container';
                             rowDiv.appendChild(thumbnailsContainer);
-
-                            rowDiv.appendChild(createRowActionBar(videoBaseName, subfolderName, ''));
-                            thumbnailsContainer.appendChild(createDeleteCross(videoBaseName, subfolderName, ''));
 
                             canvasElements.push(rowDiv);
                             updateRowUI(rowDiv, videoBaseName, subfolderName);
@@ -2712,8 +2745,20 @@
                         playVideo(videoFile, activeRotation);
                     });
 
-                    rowDiv.appendChild(createRowActionBar('playlist_entry', project.path, candidateVideos[currentIndex].subfolder));
-                    thumbnailsContainer.appendChild(createDeleteCross('playlist_entry', project.path, candidateVideos[currentIndex].subfolder));
+                    const rowHeader = document.createElement('h3');
+                    rowHeader.className = 'project-header';
+                    rowHeader.style.fontSize = '1em';
+                    rowHeader.style.marginTop = '10px';
+                    rowHeader.appendChild(createDeleteCross('playlist_entry', project.path, candidateVideos[currentIndex].subfolder, rowDiv));
+                    const rowHeaderText = document.createElement('span');
+                    rowHeaderText.textContent = 'Playlist Item';
+                    rowHeader.appendChild(rowHeaderText);
+                    const controlsContainer = document.createElement('div');
+                    controlsContainer.className = 'header-controls';
+                    controlsContainer.appendChild(createRowActionBar('playlist_entry', project.path, candidateVideos[currentIndex].subfolder, rowDiv));
+                    rowHeader.appendChild(controlsContainer);
+                    rowDiv.prepend(rowHeader);
+
                     updateRowUI(rowDiv, 'playlist_entry', project.path);
 
                     multiplierInput.addEventListener('change', () => {
