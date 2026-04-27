@@ -41,22 +41,19 @@
             border-bottom: 1px solid #444444;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             height: 36px;
             box-sizing: border-box;
             background-color: var(--toolbar-color);
         }
-        .bottom-bar {
-            padding: 4px 10px;
-            border-top: 1px solid #444444;
+        .top-bar-left {
             display: flex;
             align-items: center;
-            min-height: 36px;
-            box-sizing: border-box;
-            background-color: var(--toolbar-color);
-            color: white;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 5px;
+        }
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         #thumbnail-container {
             flex-grow: 1;
@@ -136,15 +133,57 @@
             resize: vertical;
         }
         .landscape-row {
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             display: flex;
             flex-direction: column;
+            position: relative;
+            width: fit-content;
+            min-width: 100%;
         }
         .thumbnails-container {
             display: flex;
             flex-wrap: wrap;
-            align-items: flex-start;
+            align-items: stretch;
             position: relative;
+            width: fit-content;
+        }
+        .row-action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            margin-top: 5px;
+            background-color: rgba(0, 0, 0, 0.2);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .row-action-group-left {
+            display: flex;
+            gap: 5px;
+        }
+        .row-action-group-right {
+            display: flex;
+        }
+        .delete-cross {
+            font-size: 80px;
+            color: var(--delete-sc-color);
+            cursor: pointer;
+            line-height: 1;
+            user-select: none;
+            opacity: 0.3;
+            transition: opacity 0.2s;
+            margin-left: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        .delete-cross:hover {
+            opacity: 1;
+        }
+        .delete-cross.active {
+            opacity: 1;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
         }
         .main-container.show-numbers .thumbnails-container {
             padding-left: 40px;
@@ -398,130 +437,112 @@
     <div class="main-container">
         <div class="main-content">
             <div class="top-bar">
-                <div id="load-menu-container" style="position: relative; margin-right: 10px;">
-                    <button id="load-menu-btn" title="Load" class="bar-button" style="padding: 0 8px; display: flex; align-items: center; justify-content: center;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                    </button>
-                    <div id="load-dropdown" class="dropdown-content">
-                        <button id="load-directory-btn">Load all videos</button>
-                        <button id="load-latest-videos-btn">Load new videos</button>
-                        <button id="load-sc-btn">Load all shortcuts</button>
-                        <button id="load-root-sc-btn">Load root shortcut directory</button>
-                        <button id="create-playlist-load-btn">Create playlist</button>
-                        <button id="create-playlist-root-load-btn">Create playlist root</button>
-                        <button id="update-playlist-root-load-btn">Update playlist root</button>
+                <div class="top-bar-left">
+                    <div id="load-menu-container" style="position: relative; margin-right: 10px;">
+                        <button id="load-menu-btn" title="Load" class="bar-button" style="padding: 0 8px; display: flex; align-items: center; justify-content: center;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                        </button>
+                        <div id="load-dropdown" class="dropdown-content">
+                            <button id="load-directory-btn">Load all videos</button>
+                            <button id="load-latest-videos-btn">Load new videos</button>
+                            <button id="load-sc-btn">Load all shortcuts</button>
+                            <button id="load-root-sc-btn">Load root shortcut directory</button>
+                            <button id="create-playlist-load-btn">Create playlist</button>
+                            <button id="create-playlist-root-load-btn">Create playlist root</button>
+                            <button id="update-playlist-root-load-btn">Update playlist root</button>
+                        </div>
+                    </div>
+                    <div id="options-menu-container" style="position: relative; margin-right: 10px;">
+                        <button id="options-menu-btn" title="Options" class="bar-button" style="padding: 0 8px; display: flex; align-items: center; justify-content: center;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white;">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                        </button>
+                        <div id="options-dropdown" class="dropdown-content">
+                            <div class="options-row">
+                                <label for="bg-color-picker">Page Background</label>
+                                <input type="color" id="bg-color-picker" value="#3d0021">
+                            </div>
+                            <div class="options-row">
+                                <label for="toolbar-color-picker">Toolbars</label>
+                                <input type="color" id="toolbar-color-picker" value="#1c1c1c">
+                            </div>
+                            <div class="options-row">
+                                <label for="root-sc-color-picker">Root SC Outline</label>
+                                <input type="color" id="root-sc-color-picker" value="#ffe11f">
+                            </div>
+                            <div class="options-row">
+                                <label for="subfolder-sc-color-picker">Subfolder SC Outline</label>
+                                <input type="color" id="subfolder-sc-color-picker" value="#00ff1e">
+                            </div>
+                            <div class="options-row">
+                                <label for="both-sc-color-picker">Both SC Outline</label>
+                                <input type="color" id="both-sc-color-picker" value="#009dff">
+                            </div>
+                            <div class="options-row">
+                                <label for="delete-sc-color-picker">Delete Selection Outline</label>
+                                <input type="color" id="delete-sc-color-picker" value="#ff0101">
+                            </div>
+                            <div class="options-row">
+                                <label for="header-text-color-picker">Folder Header Text</label>
+                                <input type="color" id="header-text-color-picker" value="#01ff01">
+                            </div>
+                            <div class="options-row">
+                                <label for="row-number-color-picker">Show Numbers Header Text</label>
+                                <input type="color" id="row-number-color-picker" value="#fcfc01">
+                            </div>
+                            <div class="options-row">
+                                <label for="date-text-color-picker">Date Text Color</label>
+                                <input type="color" id="date-text-color-picker" value="#01ffff">
+                            </div>
+                            <div class="options-row">
+                                <label for="playlist-sc-color-picker">Playlist Selection Outline</label>
+                                <input type="color" id="playlist-sc-color-picker" value="#ff00ff">
+                            </div>
+                            <button id="revert-defaults-btn" style="width: 100%; text-align: center; border-top: 1px solid #ccc; font-weight: bold;">Revert to Default Colors</button>
+                        </div>
+                    </div>
+                    <select id="size-selector">
+                        <option value="0.2">20%</option>
+                        <option value="0.3">30%</option>
+                        <option value="0.4">40%</option>
+                        <option value="0.5">50%</option>
+                        <option value="0.6">60%</option>
+                        <option value="0.7">70%</option>
+                        <option value="0.8">80%</option>
+                        <option value="0.9">90%</option>
+                        <option value="1" selected>100%</option>
+                    </select>
+                    <select id="sort-selector">
+                        <option value="" disabled selected hidden>Sort</option>
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                        <option value="date-new">Date (Newest)</option>
+                        <option value="date-old">Date (Oldest)</option>
+                    </select>
+                    <button id="prev-canvas-btn" class="bar-button">&lt;</button>
+                    <select id="canvas-select"></select>
+                    <button id="next-canvas-btn" class="bar-button">&gt;</button>
+                    <select id="group-selector"></select>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="show-dates-checkbox">
+                        <label for="show-dates-checkbox">Show Dates</label>
+                    </div>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="show-numbers-checkbox">
+                        <label for="show-numbers-checkbox">Show Numbers</label>
                     </div>
                 </div>
-                <div id="options-menu-container" style="position: relative; margin-right: 10px;">
-                    <button id="options-menu-btn" title="Options" class="bar-button" style="padding: 0 8px; display: flex; align-items: center; justify-content: center;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: white;">
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                        </svg>
-                    </button>
-                    <div id="options-dropdown" class="dropdown-content">
-                        <div class="options-row">
-                            <label for="bg-color-picker">Page Background</label>
-                            <input type="color" id="bg-color-picker" value="#3d0021">
-                        </div>
-                        <div class="options-row">
-                            <label for="toolbar-color-picker">Toolbars</label>
-                            <input type="color" id="toolbar-color-picker" value="#1c1c1c">
-                        </div>
-                        <div class="options-row">
-                            <label for="root-sc-color-picker">Root SC Outline</label>
-                            <input type="color" id="root-sc-color-picker" value="#ffe11f">
-                        </div>
-                        <div class="options-row">
-                            <label for="subfolder-sc-color-picker">Subfolder SC Outline</label>
-                            <input type="color" id="subfolder-sc-color-picker" value="#00ff1e">
-                        </div>
-                        <div class="options-row">
-                            <label for="both-sc-color-picker">Both SC Outline</label>
-                            <input type="color" id="both-sc-color-picker" value="#009dff">
-                        </div>
-                        <div class="options-row">
-                            <label for="delete-sc-color-picker">Delete Selection Outline</label>
-                            <input type="color" id="delete-sc-color-picker" value="#ff0101">
-                        </div>
-                        <div class="options-row">
-                            <label for="header-text-color-picker">Folder Header Text</label>
-                            <input type="color" id="header-text-color-picker" value="#01ff01">
-                        </div>
-                        <div class="options-row">
-                            <label for="row-number-color-picker">Show Numbers Header Text</label>
-                            <input type="color" id="row-number-color-picker" value="#fcfc01">
-                        </div>
-                        <div class="options-row">
-                            <label for="date-text-color-picker">Date Text Color</label>
-                            <input type="color" id="date-text-color-picker" value="#01ffff">
-                        </div>
-                        <div class="options-row">
-                            <label for="playlist-sc-color-picker">Playlist Selection Outline</label>
-                            <input type="color" id="playlist-sc-color-picker" value="#ff00ff">
-                        </div>
-                        <button id="revert-defaults-btn" style="width: 100%; text-align: center; border-top: 1px solid #ccc; font-weight: bold;">Revert to Default Colors</button>
-                    </div>
-                </div>
-                <select id="size-selector">
-                    <option value="0.2">20%</option>
-                    <option value="0.3">30%</option>
-                    <option value="0.4">40%</option>
-                    <option value="0.5">50%</option>
-                    <option value="0.6">60%</option>
-                    <option value="0.7">70%</option>
-                    <option value="0.8">80%</option>
-                    <option value="0.9">90%</option>
-                    <option value="1" selected>100%</option>
-                </select>
-                <select id="sort-selector">
-                    <option value="" disabled selected hidden>Sort</option>
-                    <option value="name-asc">Name (A-Z)</option>
-                    <option value="name-desc">Name (Z-A)</option>
-                    <option value="date-new">Date (Newest)</option>
-                    <option value="date-old">Date (Oldest)</option>
-                </select>
-                <button id="prev-canvas-btn" class="bar-button">&lt;</button>
-                <select id="canvas-select"></select>
-                <button id="next-canvas-btn" class="bar-button">&gt;</button>
-                <select id="group-selector"></select>
-                <div class="checkbox-container">
-                    <input type="checkbox" id="show-dates-checkbox">
-                    <label for="show-dates-checkbox">Show Dates</label>
-                </div>
-                <div class="checkbox-container">
-                    <input type="checkbox" id="show-numbers-checkbox">
-                    <label for="show-numbers-checkbox">Show Numbers</label>
+                <div class="top-bar-right">
+                    <button id="shortcut-script-btn" class="bar-button">Create Shortcut Script</button>
+                    <button id="create-playlist-btn" class="bar-button" style="display: none;">Create Playlist</button>
+                    <button id="delete-shortcuts-btn" class="bar-button" style="display: none;">Delete Selected Shortcuts</button>
                 </div>
             </div>
             <div id="content-area" style="display: flex; flex-grow: 1; overflow: hidden;">
                 <div id="thumbnail-container">
                     <div id="content-spacer" style="position: absolute; top: 0; left: 0; z-index: -1;"></div>
-                </div>
-            </div>
-            <div class="bottom-bar">
-                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 5px;">
-                    <button id="root-sc-btn" class="bar-button selection-type-button" style="display: none;"><span class="color-circle"></span>Root SC</button>
-                    <button id="subfolder-sc-btn" class="bar-button selection-type-button" style="display: none;"><span class="color-circle"></span>Subfolder SC</button>
-                    <button id="both-sc-btn" class="bar-button selection-type-button" style="display: none;"><span class="color-circle"></span>Both</button>
-                    <button id="delete-sc-btn" class="bar-button selection-type-button" style="display: none;"><span class="color-circle"></span>Delete</button>
-                    <button id="playlist-sc-btn" class="bar-button selection-type-button" style="display: none;"><span class="color-circle"></span>Playlist</button>
-                    <button id="rotate-sc-btn" class="bar-button selection-type-button"><span class="color-circle"></span>Rotate</button>
-                    <button id="play-btn" class="bar-button selection-type-button"><span class="color-circle"></span>Play</button>
-                </div>
-                <div id="rotation-controls" style="display: none; align-items: center;">
-                    <select id="rotation-selector" style="margin-right: 10px;">
-                        <option value="0">Default</option>
-                        <option value="270">Left 90°</option>
-                        <option value="90">Right 90°</option>
-                        <option value="180">180°</option>
-                    </select>
-                    <button id="delete-rotation-btn" class="bar-button" style="display: none;">Delete Rotation</button>
-                </div>
-                <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 5px;">
-                    <button id="shortcut-script-btn" class="bar-button">Create Shortcut Script</button>
-                    <button id="create-playlist-btn" class="bar-button" style="display: none;">Create Playlist</button>
-                    <button id="delete-shortcuts-btn" class="bar-button" style="display: none;">Delete Selected Shortcuts</button>
                 </div>
             </div>
         </div>
@@ -569,13 +590,13 @@
         const contentSpacer = document.getElementById('content-spacer');
         const canvasSelect = document.getElementById('canvas-select');
         const groupSelector = document.getElementById('group-selector');
-        const rootScBtn = document.getElementById('root-sc-btn');
-        const subfolderScBtn = document.getElementById('subfolder-sc-btn');
-        const bothScBtn = document.getElementById('both-sc-btn');
-        const deleteScBtn = document.getElementById('delete-sc-btn');
-        const playlistScBtn = document.getElementById('playlist-sc-btn');
-        const rotateScBtn = document.getElementById('rotate-sc-btn');
-        const playBtn = document.getElementById('play-btn');
+        const rootScBtn = null;
+        const subfolderScBtn = null;
+        const bothScBtn = null;
+        const deleteScBtn = null;
+        const playlistScBtn = null;
+        const rotateScBtn = null;
+        const playBtn = null;
         const videoModal = document.getElementById('video-modal');
         const player = document.getElementById('player');
         const closeVideoModal = document.getElementById('close-video-modal');
@@ -586,9 +607,9 @@
         const optionsMenuBtn = document.getElementById('options-menu-btn');
         const optionsDropdown = document.getElementById('options-dropdown');
         const revertDefaultsBtn = document.getElementById('revert-defaults-btn');
-        const rotationControls = document.getElementById('rotation-controls');
-        const rotationSelector = document.getElementById('rotation-selector');
-        const deleteRotationBtn = document.getElementById('delete-rotation-btn');
+        const rotationControls = null;
+        const rotationSelector = null;
+        const deleteRotationBtn = null;
 
         let allVideoFiles = [];
         let allProjectFolders = [];
@@ -892,10 +913,10 @@
                 scriptModal.style.display = 'block';
             });
 
-            deleteScBtn.addEventListener('click', () => setSelectionType('delete-sc'));
-            playlistScBtn.addEventListener('click', () => setSelectionType('playlist-sc'));
-            rotateScBtn.addEventListener('click', () => setSelectionType('rotate-sc'));
-            playBtn.addEventListener('click', () => setSelectionType('play'));
+            if (deleteScBtn) deleteScBtn.addEventListener('click', () => setSelectionType('delete-sc'));
+            if (playlistScBtn) playlistScBtn.addEventListener('click', () => setSelectionType('playlist-sc'));
+            if (rotateScBtn) rotateScBtn.addEventListener('click', () => setSelectionType('rotate-sc'));
+            if (playBtn) playBtn.addEventListener('click', () => setSelectionType('play'));
 
             closeVideoModal.addEventListener('click', () => {
                 videoModal.style.display = 'none';
@@ -915,39 +936,43 @@
                 scriptModal.style.display = 'block';
             });
 
-            rootScBtn.addEventListener('click', () => setSelectionType('root-sc'));
-            subfolderScBtn.addEventListener('click', () => setSelectionType('subfolder-sc'));
-            bothScBtn.addEventListener('click', () => setSelectionType('both-sc'));
+            if (rootScBtn) rootScBtn.addEventListener('click', () => setSelectionType('root-sc'));
+            if (subfolderScBtn) subfolderScBtn.addEventListener('click', () => setSelectionType('subfolder-sc'));
+            if (bothScBtn) bothScBtn.addEventListener('click', () => setSelectionType('both-sc'));
 
             prevCanvasBtn.addEventListener('click', () => navigateCanvas(-1));
             nextCanvasBtn.addEventListener('click', () => navigateCanvas(1));
 
-            deleteRotationBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const selectedRows = document.querySelectorAll('.landscape-row:has(.selected-root-sc), .landscape-row:has(.selected-subfolder-sc), .landscape-row:has(.selected-both-sc), .landscape-row:has(.selected-delete-sc), .landscape-row:has(.selected-playlist-sc)');
-                
-                selectedRows.forEach(row => {
-                    const videoName = row.dataset.videoName;
-                    const projectPath = row.dataset.projectPath;
-                    const key = projectPath + '|' + videoName;
-                    const selection = shortcutSelections.get(key);
-                    if (selection) {
-                        selection.rotation = "0";
-                        row.querySelectorAll('.thumbnail').forEach(t => {
-                            t.classList.remove('rotate-90', 'rotate-180', 'rotate-270');
-                        });
-                    }
+            if (deleteRotationBtn) {
+                deleteRotationBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const selectedRows = document.querySelectorAll('.landscape-row:has(.selected-root-sc), .landscape-row:has(.selected-subfolder-sc), .landscape-row:has(.selected-both-sc), .landscape-row:has(.selected-delete-sc), .landscape-row:has(.selected-playlist-sc)');
+
+                    selectedRows.forEach(row => {
+                        const videoName = row.dataset.videoName;
+                        const projectPath = row.dataset.projectPath;
+                        const key = projectPath + '|' + videoName;
+                        const selection = shortcutSelections.get(key);
+                        if (selection) {
+                            selection.rotation = "0";
+                            row.querySelectorAll('.thumbnail').forEach(t => {
+                                t.classList.remove('rotate-90', 'rotate-180', 'rotate-270');
+                            });
+                        }
+                    });
+                    deleteRotationBtn.style.display = 'none';
                 });
-                deleteRotationBtn.style.display = 'none';
-            });
+            }
         }
 
         function updateRotationUI(key) {
             const selection = shortcutSelections.get(key);
-            if (selection && selection.rotation && selection.rotation !== "0") {
-                deleteRotationBtn.style.display = 'inline-block';
-            } else {
-                deleteRotationBtn.style.display = 'none';
+            if (deleteRotationBtn) {
+                if (selection && selection.rotation && selection.rotation !== "0") {
+                    deleteRotationBtn.style.display = 'inline-block';
+                } else {
+                    deleteRotationBtn.style.display = 'none';
+                }
             }
         }
 
@@ -994,13 +1019,7 @@
         }
 
         function updateSelectionTypeButtons() {
-            if (rootScBtn) rootScBtn.classList.toggle('active', currentSelectionType === 'root-sc');
-            if (subfolderScBtn) subfolderScBtn.classList.toggle('active', currentSelectionType === 'subfolder-sc');
-            if (bothScBtn) bothScBtn.classList.toggle('active', currentSelectionType === 'both-sc');
-            if (deleteScBtn) deleteScBtn.classList.toggle('active', currentSelectionType === 'delete-sc');
-            if (playlistScBtn) playlistScBtn.classList.toggle('active', currentSelectionType === 'playlist-sc');
-            if (rotateScBtn) rotateScBtn.classList.toggle('active', currentSelectionType === 'rotate-sc');
-            if (playBtn) playBtn.classList.toggle('active', currentSelectionType === 'play');
+            // Deprecated - row action bars handle their own active states
         }
 
         function playVideo(file, rotation) {
@@ -1068,6 +1087,131 @@
             }
         });
 
+        function updateRowUI(rowDiv, videoName, projectPath) {
+            const key = projectPath + '|' + videoName;
+            const selection = shortcutSelections.get(key);
+            const type = selection ? selection.type : '';
+            const rotation = selection ? selection.rotation : "0";
+
+            rowDiv.querySelectorAll('.thumbnail').forEach(t => {
+                t.classList.remove('selected-root-sc', 'selected-subfolder-sc', 'selected-both-sc', 'selected-delete-sc', 'selected-playlist-sc', 'selected-shortcut');
+                t.classList.remove('rotate-90', 'rotate-180', 'rotate-270');
+                if (type) {
+                    t.classList.add('selected-' + type);
+                }
+                if (rotation !== "0") {
+                    t.classList.add('rotate-' + rotation);
+                }
+            });
+
+            const deleteCross = rowDiv.querySelector('.delete-cross');
+            if (deleteCross) {
+                deleteCross.classList.toggle('active', type === 'delete-sc');
+                if (type === 'delete-sc') {
+                    deleteCross.style.opacity = '1';
+                } else {
+                    deleteCross.style.opacity = '';
+                }
+            }
+
+            rowDiv.querySelectorAll('.row-bar-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.type && btn.dataset.type === type) {
+                    btn.classList.add('active');
+                }
+            });
+
+            layoutLandscapeThumbnails();
+        }
+
+        function createRowActionBar(videoName, projectPath, subfolder) {
+            const bar = document.createElement('div');
+            bar.className = 'row-action-bar';
+
+            const leftGroup = document.createElement('div');
+            leftGroup.className = 'row-action-group-left';
+
+            const rightGroup = document.createElement('div');
+            rightGroup.className = 'row-action-group-right';
+
+            const createBtn = (text, onClick, type = null) => {
+                const btn = document.createElement('button');
+                btn.className = 'bar-button row-bar-btn';
+                btn.textContent = text;
+                if (type) btn.dataset.type = type;
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    onClick();
+                };
+                return btn;
+            };
+
+            const key = projectPath + '|' + videoName;
+
+            const rotate = (delta) => {
+                let selection = shortcutSelections.get(key);
+                if (!selection) {
+                    selection = { videoName, projectPath, subfolder, type: '', rotation: "0" };
+                    shortcutSelections.set(key, selection);
+                }
+                let currentRot = parseInt(selection.rotation || "0");
+                let newRot = (currentRot + delta + 360) % 360;
+                selection.rotation = newRot.toString();
+                updateRowUI(bar.parentElement, videoName, projectPath);
+            };
+
+            const setType = (type) => {
+                let selection = shortcutSelections.get(key);
+                if (selection && selection.type === type) {
+                    selection.type = '';
+                } else {
+                    if (!selection) {
+                        selection = { videoName, projectPath, subfolder, type: type, rotation: "0" };
+                        shortcutSelections.set(key, selection);
+                    } else {
+                        selection.type = type;
+                    }
+                }
+                updateRowUI(bar.parentElement, videoName, projectPath);
+            };
+
+            leftGroup.appendChild(createBtn('Rotate Left', () => rotate(-90)));
+            leftGroup.appendChild(createBtn('Both', () => setType('both-sc'), 'both-sc'));
+            leftGroup.appendChild(createBtn('Subfolder', () => setType('subfolder-sc'), 'subfolder-sc'));
+            leftGroup.appendChild(createBtn('Root', () => setType('root-sc'), 'root-sc'));
+            leftGroup.appendChild(createBtn('Rotate 180°', () => rotate(180)));
+
+            rightGroup.appendChild(createBtn('Rotate Right', () => rotate(90)));
+
+            bar.appendChild(leftGroup);
+            bar.appendChild(rightGroup);
+            return bar;
+        }
+
+        function createDeleteCross(videoName, projectPath, subfolder) {
+            const cross = document.createElement('div');
+            cross.className = 'delete-cross';
+            cross.innerHTML = '&times;';
+            cross.title = 'Delete video';
+            cross.onclick = (e) => {
+                e.stopPropagation();
+                const key = projectPath + '|' + videoName;
+                let selection = shortcutSelections.get(key);
+                if (selection && selection.type === 'delete-sc') {
+                    selection.type = '';
+                } else {
+                    if (!selection) {
+                        selection = { videoName, projectPath, subfolder, type: 'delete-sc', rotation: "0" };
+                        shortcutSelections.set(key, selection);
+                    } else {
+                        selection.type = 'delete-sc';
+                    }
+                }
+                updateRowUI(cross.parentElement, videoName, projectPath);
+            };
+            return cross;
+        }
+
         async function findDirectoryHandleByName(dirHandle, name) {
             const lowerCaseName = name.toLowerCase();
             for await (const entry of dirHandle.values()) {
@@ -1089,27 +1233,13 @@
             const isPlaylist = mode === 'playlist';
             const isPlaylistRoot = mode === 'playlist-root' || mode === 'update-playlist-root';
 
-            deleteShortcutsBtn.style.display = 'none'; // Script handles deletions now
-            shortcutScriptBtn.style.display = (isPlaylist || isPlaylistRoot) ? 'none' : 'inline-block';
-            createPlaylistBtn.style.display = (isPlaylist || isPlaylistRoot) ? 'inline-block' : 'none';
+            if (deleteShortcutsBtn) deleteShortcutsBtn.style.display = 'none';
+            if (shortcutScriptBtn) shortcutScriptBtn.style.display = (isPlaylist || isPlaylistRoot) ? 'none' : 'inline-block';
+            if (createPlaylistBtn) createPlaylistBtn.style.display = (isPlaylist || isPlaylistRoot) ? 'inline-block' : 'none';
 
             checkboxContainers.forEach(el => el.style.display = 'flex');
             canvasSelect.style.display = (isDirectory || isSc || isRootSc || isScNew || isLatestVideos || isPlaylist || isPlaylistRoot) ? 'inline-block' : 'none';
             groupSelector.style.display = 'none';
-
-            const showSelectionButtons = isLatestVideos || isDirectory || isSc || isRootSc || isScNew || isPlaylist || isPlaylistRoot;
-            if (rootScBtn) rootScBtn.style.display = (showSelectionButtons && !isPlaylistRoot) ? 'inline-block' : 'none';
-            if (subfolderScBtn) subfolderScBtn.style.display = (showSelectionButtons && !isPlaylistRoot) ? 'inline-block' : 'none';
-            if (bothScBtn) bothScBtn.style.display = (showSelectionButtons && !isPlaylistRoot) ? 'inline-block' : 'none';
-            if (deleteScBtn) deleteScBtn.style.display = (showSelectionButtons && !isPlaylist && !isPlaylistRoot) ? 'inline-block' : 'none';
-            if (playlistScBtn) playlistScBtn.style.display = isPlaylistRoot ? 'inline-block' : 'none';
-            if (showSelectionButtons) {
-                updateSelectionTypeButtons();
-            }
-
-            if (rotationControls) {
-                rotationControls.style.display = (isDirectory || isLatestVideos) ? 'flex' : 'none';
-            }
         }
 
         showDatesCheckbox.addEventListener('change', () => {
@@ -2065,69 +2195,21 @@
                         initialShortcutSelections.set(key, { type: initialShortcutType, rotation: rotation });
                     }
 
-                    canvasElements.push(rowDiv);
+                    rowDiv.appendChild(createRowActionBar(videoFile.name, project.path, videoFile.subfolder));
+                    thumbnailsContainer.appendChild(createDeleteCross(videoFile.name, project.path, videoFile.subfolder));
 
-                    rowDiv.addEventListener('click', () => {
-                        if (currentSelectionType === 'play') {
-                            const selectedRotation = rotationSelector.value;
-                            const key = project.path + '|' + videoFile.name;
-                            const selection = shortcutSelections.get(key);
-                            const activeRotation = selectedRotation !== "0" ? selectedRotation : ((selection && selection.rotation) ? selection.rotation : rotation);
-                            playVideo(videoFile, activeRotation);
+                    canvasElements.push(rowDiv);
+                    updateRowUI(rowDiv, videoFile.name, project.path);
+
+                    rowDiv.addEventListener('click', (e) => {
+                        // If a button was clicked, don't trigger play
+                        if (e.target.closest('.bar-button') || e.target.closest('.delete-cross') || e.target.closest('.multiplier-input')) {
                             return;
                         }
                         const key = project.path + '|' + videoFile.name;
-                        const selectedRotation = rotationSelector.value;
-                        const existingSelection = shortcutSelections.get(key);
-
-                        let newRotation = "0";
-                        if (selectedRotation !== "0") {
-                            newRotation = selectedRotation;
-                        } else if (existingSelection && existingSelection.rotation) {
-                            newRotation = existingSelection.rotation;
-                        } else if (rotation !== "0") {
-                            newRotation = rotation;
-                        }
-
-                        const isRotateOnly = currentSelectionType === 'rotate-sc';
-                        
-                        if (isRotateOnly) {
-                             newRotation = selectedRotation;
-                        }
-
-                        const selectionData = {
-                            videoName: videoFile.name,
-                            projectPath: project.path,
-                            subfolder: videoFile.subfolder,
-                            type: isRotateOnly ? (existingSelection ? existingSelection.type : '') : currentSelectionType,
-                            multiplier: multiplierInput ? (parseInt(multiplierInput.value) || 1) : 1,
-                            rotation: newRotation
-                        };
-
-                        // Clear previous selection visuals from this row
-                        rowDiv.querySelectorAll('.thumbnail').forEach(t => {
-                            t.classList.remove('selected-root-sc', 'selected-subfolder-sc', 'selected-both-sc', 'selected-delete-sc', 'selected-playlist-sc', 'selected-shortcut');
-                            t.classList.remove('rotate-90', 'rotate-180', 'rotate-270');
-                        });
-
-                        if (existingSelection) {
-                            shortcutSelections.delete(key);
-                        }
-
-                        // If the new selection is different from the old one, or if there was no old one, add it.
-                        if (!existingSelection || existingSelection.type !== currentSelectionType || selectedRotation !== "0" || isRotateOnly) {
-                            rowDiv.querySelectorAll('.thumbnail').forEach(t => {
-                                if (selectionData.type) {
-                                    t.classList.add('selected-' + selectionData.type);
-                                }
-                                if (newRotation !== "0") {
-                                    t.classList.add('rotate-' + newRotation);
-                                }
-                            });
-                            shortcutSelections.set(key, selectionData);
-                        }
-                        layoutLandscapeThumbnails();
-                        updateRotationUI(key);
+                        const selection = shortcutSelections.get(key);
+                        const activeRotation = (selection && selection.rotation) ? selection.rotation : rotation;
+                        playVideo(videoFile, activeRotation);
                     });
 
                     files.forEach(file => {
@@ -2282,74 +2364,32 @@
                             thumbnailsContainer.className = 'thumbnails-container';
                             rowDiv.appendChild(thumbnailsContainer);
 
+                            rowDiv.appendChild(createRowActionBar(videoBaseName, subfolderName, ''));
+                            thumbnailsContainer.appendChild(createDeleteCross(videoBaseName, subfolderName, ''));
+
                             canvasElements.push(rowDiv);
+                            updateRowUI(rowDiv, videoBaseName, subfolderName);
 
                              let videoFile;
-                             rowDiv.addEventListener('click', async () => {
-                                if (currentSelectionType === 'play') {
-                                    if (!videoFile) {
-                                        for await (const entry of subfolderHandle.values()) {
-                                            if (entry.kind === 'file' && entry.name.startsWith(videoBaseName)) {
-                                                videoFile = await entry.getFile();
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    if (videoFile) {
-                                        const selectedRotation = rotationSelector.value;
-                                        const key = subfolderName + '|' + videoBaseName;
-                                        const selection = shortcutSelections.get(key);
-                                        const activeRotation = selectedRotation !== "0" ? selectedRotation : ((selection && selection.rotation) ? selection.rotation : rotation);
-                                        playVideo(videoFile, activeRotation);
-                                    }
+                             rowDiv.addEventListener('click', async (e) => {
+                                // If a button was clicked, don't trigger play
+                                if (e.target.closest('.bar-button') || e.target.closest('.delete-cross') || e.target.closest('.multiplier-input')) {
                                     return;
                                 }
-                                const key = subfolderName + '|' + videoBaseName;
-                                const selectedRotation = rotationSelector.value;
-                                const existingSelection = shortcutSelections.get(key);
-
-                                let newRotation = "0";
-                                if (selectedRotation !== "0") {
-                                    newRotation = selectedRotation;
-                                } else if (existingSelection && existingSelection.rotation) {
-                                    newRotation = existingSelection.rotation;
-                                } else if (rotation !== "0") {
-                                    newRotation = rotation;
-                                }
-
-                                const isRotateOnly = currentSelectionType === 'rotate-sc';
-                                if (isRotateOnly) newRotation = selectedRotation;
-
-                                const selectionData = {
-                                    videoName: videoBaseName,
-                                    projectPath: subfolderName,
-                                    type: isRotateOnly ? (existingSelection ? existingSelection.type : '') : currentSelectionType,
-                                    rotation: newRotation
-                                };
-
-                                // Clear previous selection visuals from this row
-                                rowDiv.querySelectorAll('.thumbnail').forEach(t => {
-                                    t.classList.remove('selected-root-sc', 'selected-subfolder-sc', 'selected-both-sc', 'selected-delete-sc', 'selected-shortcut');
-                                    t.classList.remove('rotate-90', 'rotate-180', 'rotate-270');
-                                });
-
-                                if (existingSelection) {
-                                    shortcutSelections.delete(key);
-                                }
-
-                                if (!existingSelection || existingSelection.type !== currentSelectionType || selectedRotation !== "0" || isRotateOnly) {
-                                    rowDiv.querySelectorAll('.thumbnail').forEach(t => {
-                                        if (selectionData.type) {
-                                            t.classList.add('selected-' + selectionData.type);
+                                if (!videoFile) {
+                                    for await (const entry of subfolderHandle.values()) {
+                                        if (entry.kind === 'file' && entry.name.startsWith(videoBaseName)) {
+                                            videoFile = await entry.getFile();
+                                            break;
                                         }
-                                        if (newRotation !== "0") {
-                                            t.classList.add('rotate-' + newRotation);
-                                        }
-                                    });
-                                    shortcutSelections.set(key, selectionData);
+                                    }
                                 }
-                                layoutLandscapeThumbnails();
-                                updateRotationUI(key);
+                                if (videoFile) {
+                                    const key = subfolderName + '|' + videoBaseName;
+                                    const selection = shortcutSelections.get(key);
+                                    const activeRotation = (selection && selection.rotation) ? selection.rotation : rotation;
+                                    playVideo(videoFile, activeRotation);
+                                }
                             });
 
                              projectVideoCount++;
@@ -2601,7 +2641,6 @@
                         dateInfo.textContent = `Created: ${new Date(videoFile.lastModified).toLocaleString()}`;
                         
                         const videoBaseName = video.name.substring(0, video.name.lastIndexOf('.'));
-                        const rotation = projectRotationData.get(videoBaseName.toLowerCase()) || "0";
                         const editDirHandle = await findDirectoryHandleByName(project.handle, 'Edit Thumbnails');
                         const thumbnailFiles = [];
                         for await (const entry of editDirHandle.values()) {
@@ -2617,8 +2656,12 @@
                         });
 
                         thumbnailsContainer.innerHTML = '';
-                        const selectionKey = project.path + '|playlist_entry';
-                        const existingSelection = shortcutSelections.get(selectionKey);
+                        const key = project.path + '|playlist_entry';
+                        let selection = shortcutSelections.get(key);
+                        if (selection) {
+                            selection.videoName = video.name;
+                            selection.subfolder = video.subfolder;
+                        }
 
                         thumbnailFiles.forEach(file => {
                             const wrapper = document.createElement('div');
@@ -2626,12 +2669,6 @@
                             const img = new Image();
                             img.className = 'thumbnail';
                             img.dataset.projectPath = project.path;
-                            if (existingSelection) {
-                                img.classList.add('selected-' + existingSelection.type);
-                            }
-                            if (rotation !== "0") {
-                                img.classList.add('rotate-' + rotation);
-                            }
                             wrapper.appendChild(img);
                             thumbnailsContainer.appendChild(wrapper);
 
@@ -2645,6 +2682,7 @@
                             createdObjectUrls.push(url);
                             img.src = url;
                         });
+                        updateRowUI(rowDiv, 'playlist_entry', project.path);
                         localStorage.setItem(`playlist-thumb-index-${project.path}`, index);
                     };
 
@@ -2662,58 +2700,21 @@
                         updateDisplayedVideo(currentIndex);
                     };
 
-                    rowDiv.addEventListener('click', async () => {
-                        const video = candidateVideos[currentIndex];
-                        if (currentSelectionType === 'play') {
-                            const videoFile = await video.getFile();
-                            const videoBaseName = video.name.substring(0, video.name.lastIndexOf('.'));
-                            const loadedRotation = projectRotationData.get(videoBaseName.toLowerCase()) || "0";
-                            const selectedRotation = rotationSelector.value;
-                            const key = project.path + '|playlist_entry';
-                            const selection = shortcutSelections.get(key);
-                            const activeRotation = selectedRotation !== "0" ? selectedRotation : ((selection && selection.rotation) ? selection.rotation : loadedRotation);
-                            playVideo(videoFile, activeRotation);
+                    rowDiv.addEventListener('click', async (e) => {
+                        if (e.target.closest('.bar-button') || e.target.closest('.delete-cross') || e.target.closest('.multiplier-input') || e.target.closest('.playlist-nav-btn')) {
                             return;
                         }
-                        const videoBaseName = video.name.substring(0, video.name.lastIndexOf('.'));
-                        const loadedRotation = projectRotationData.get(videoBaseName.toLowerCase()) || "0";
-                        const selectedRotation = rotationSelector.value;
-                        
-                        let newRotation = "0";
-                        if (selectedRotation !== "0") {
-                            newRotation = selectedRotation;
-                        } else if (loadedRotation !== "0") {
-                            newRotation = loadedRotation;
-                        }
-
-                        const isRotateOnly = currentSelectionType === 'rotate-sc';
-                        if (isRotateOnly) newRotation = selectedRotation;
-
-                        const selectionData = { 
-                            videoName: video.name,
-                            projectPath: project.path, 
-                            type: isRotateOnly ? (existingSelection ? existingSelection.type : '') : currentSelectionType,
-                            multiplier: parseInt(multiplierInput.value) || 1,
-                            rotation: newRotation
-                        };
+                        const video = candidateVideos[currentIndex];
+                        const videoFile = await video.getFile();
                         const key = project.path + '|playlist_entry';
-                        const existingSelection = shortcutSelections.get(key);
-
-                        const allThumbnailsInRow = rowDiv.querySelectorAll('.thumbnail');
-                        allThumbnailsInRow.forEach(t => t.classList.remove('selected-root-sc', 'selected-subfolder-sc', 'selected-both-sc', 'selected-playlist-sc', 'selected-rotate-sc'));
-                        
-                        if (existingSelection) {
-                            shortcutSelections.delete(key);
-                        }
-
-                        if (!existingSelection || existingSelection.type !== currentSelectionType || isRotateOnly) {
-                            if (selectionData.type) {
-                                allThumbnailsInRow.forEach(t => t.classList.add('selected-' + selectionData.type));
-                            }
-                            shortcutSelections.set(key, selectionData);
-                        }
-                        layoutLandscapeThumbnails();
+                        const selection = shortcutSelections.get(key);
+                        const activeRotation = (selection && selection.rotation) ? selection.rotation : "0";
+                        playVideo(videoFile, activeRotation);
                     });
+
+                    rowDiv.appendChild(createRowActionBar('playlist_entry', project.path, candidateVideos[currentIndex].subfolder));
+                    thumbnailsContainer.appendChild(createDeleteCross('playlist_entry', project.path, candidateVideos[currentIndex].subfolder));
+                    updateRowUI(rowDiv, 'playlist_entry', project.path);
 
                     multiplierInput.addEventListener('change', () => {
                         const key = project.path + '|playlist_entry';
