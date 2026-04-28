@@ -1982,6 +1982,36 @@
             projectFolders.sort((a, b) => a.name.localeCompare(b.name));
             allProjectFolders = projectFolders.map(p => ({ name: p.name, path: p.path }));
 
+            // If we have a root handle, we might need to populate allProjectFolders with ALL projects,
+            // not just the ones being rendered.
+            if (g_rootHandle) {
+                const fullProjectList = [];
+                async function scanForAllProjects(dirHandle, currentPath = '') {
+                    for await (const entry of dirHandle.values()) {
+                        if (entry.kind === 'directory') {
+                            const newPath = currentPath ? `${currentPath}\\${entry.name}` : entry.name;
+                            try {
+                                await findDirectoryHandleByName(entry, 'Edit Thumbnails');
+                                fullProjectList.push({ name: entry.name, path: newPath });
+                            } catch (e) {
+                                await scanForAllProjects(entry, newPath);
+                            }
+                        }
+                    }
+                }
+                await scanForAllProjects(g_rootHandle);
+
+                // Merge and deduplicate
+                const seenPaths = new Set(allProjectFolders.map(p => p.path));
+                fullProjectList.forEach(p => {
+                    if (!seenPaths.has(p.path)) {
+                        allProjectFolders.push(p);
+                        seenPaths.add(p.path);
+                    }
+                });
+                allProjectFolders.sort((a, b) => a.name.localeCompare(b.name));
+            }
+
             let isProject = false;
             try {
                 await findDirectoryHandleByName(currentDirHandle, 'Edit Thumbnails');
@@ -2346,7 +2376,7 @@
 
                     rowDiv.addEventListener('click', (e) => {
                         // If a button was clicked, don't trigger play
-                        if (e.target.closest('.bar-button') || e.target.closest('.delete-cross') || e.target.closest('.multiplier-input')) {
+                        if (e.target.closest('.bar-button') || e.target.closest('.delete-cross') || e.target.closest('.multiplier-input') || e.target.closest('select')) {
                             return;
                         }
                         const key = project.path + '|' + videoFile.name;
@@ -2526,7 +2556,7 @@
                              let videoFile;
                              rowDiv.addEventListener('click', async (e) => {
                                 // If a button was clicked, don't trigger play
-                                if (e.target.closest('.bar-button') || e.target.closest('.delete-cross') || e.target.closest('.multiplier-input')) {
+                                if (e.target.closest('.bar-button') || e.target.closest('.delete-cross') || e.target.closest('.multiplier-input') || e.target.closest('select')) {
                                     return;
                                 }
                                 if (!videoFile) {
@@ -2854,7 +2884,7 @@
                     };
 
                     rowDiv.addEventListener('click', async (e) => {
-                        if (e.target.closest('.bar-button') || e.target.closest('.delete-cross') || e.target.closest('.multiplier-input') || e.target.closest('.playlist-nav-btn')) {
+                        if (e.target.closest('.bar-button') || e.target.closest('.delete-cross') || e.target.closest('.multiplier-input') || e.target.closest('.playlist-nav-btn') || e.target.closest('select')) {
                             return;
                         }
                         const video = candidateVideos[currentIndex];
