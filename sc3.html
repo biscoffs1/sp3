@@ -166,7 +166,7 @@
             display: flex;
         }
         .delete-cross {
-            font-size: 1.8em;
+            font-size: 3em;
             color: var(--delete-sc-color);
             cursor: pointer;
             line-height: 1;
@@ -176,11 +176,13 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin-right: 10px;
+            margin-left: 10px;
             background-color: white;
             border-radius: 4px;
-            padding: 0 6px;
+            padding: 0 12px;
             font-weight: bold;
+            height: fit-content;
+            align-self: center;
         }
         .delete-cross:hover {
             opacity: 1;
@@ -1136,6 +1138,7 @@
         function createRowActionBar(videoName, projectPath, subfolder, rowDiv) {
             const bar = document.createElement('div');
             bar.className = 'row-action-bar';
+            bar.onclick = (e) => e.stopPropagation();
 
             const leftGroup = document.createElement('div');
             leftGroup.className = 'row-action-group-left';
@@ -1197,7 +1200,6 @@
             };
 
             leftGroup.appendChild(createBtn('Rotate Left', () => rotate(-90)));
-            leftGroup.appendChild(createBtn('Rotate Right', () => rotate(90)));
             leftGroup.appendChild(createBtn('Both', () => setType('both-sc'), 'both-sc', '--both-sc-color'));
             leftGroup.appendChild(createBtn('Subfolder', () => setType('subfolder-sc'), 'subfolder-sc', '--subfolder-sc-color'));
             leftGroup.appendChild(createBtn('Root', () => setType('root-sc'), 'root-sc', '--root-sc-color'));
@@ -1234,9 +1236,13 @@
                     selection.moveTo = moveSelect.value;
                     moveSelect.style.backgroundColor = moveSelect.value ? '#166fe5' : '';
                 };
+                moveSelect.onclick = (e) => e.stopPropagation();
+                moveSelect.onmousedown = (e) => e.stopPropagation();
 
                 rightGroup.appendChild(moveSelect);
             }
+
+            rightGroup.appendChild(createBtn('Rotate Right', () => rotate(90)));
 
             bar.appendChild(leftGroup);
             bar.appendChild(rightGroup);
@@ -1265,6 +1271,43 @@
                 updateRowUI(rowDiv, videoName, projectPath);
             };
             return cross;
+        }
+
+        async function refreshAllProjectFolders() {
+            const handle = g_rootHandle || currentDirHandle;
+            if (!handle) return;
+
+            const projectList = [];
+            async function scan(dirHandle, currentPath = '') {
+                for await (const entry of dirHandle.values()) {
+                    if (entry.kind === 'directory') {
+                        const newPath = currentPath ? (currentPath + '\\' + entry.name) : entry.name;
+                        try {
+                            await entry.getDirectoryHandle('Edit Thumbnails');
+                            projectList.push({ name: entry.name, path: newPath });
+                        } catch (e) {
+                            await scan(entry, newPath);
+                        }
+                    }
+                }
+            }
+
+            try {
+                await handle.getDirectoryHandle('Edit Thumbnails');
+                projectList.push({ name: handle.name, path: '' });
+            } catch (e) {
+                await scan(handle);
+            }
+
+            const seen = new Set();
+            allProjectFolders = [];
+            projectList.forEach(p => {
+                if (!seen.has(p.path)) {
+                    allProjectFolders.push(p);
+                    seen.add(p.path);
+                }
+            });
+            allProjectFolders.sort((a, b) => a.name.localeCompare(b.name));
         }
 
         async function findDirectoryHandleByName(dirHandle, name) {
@@ -1721,7 +1764,7 @@
                 scriptLines.push("    \$luaContent += ''");
                 scriptLines.push("    \$luaContent += '    mp.set_property(\"video-rotate\", 0)'");
                 scriptLines.push("    \$luaContent += ''");
-                scriptLines.push("    \$luaContent += '    local filename = path:match(\"([^/\\\\\\\\]+)\$\") or path'");
+                scriptLines.push("    \$luaContent += '    local filename = path:match(\"([^/\\\\\\\\\\\\\\\\]+)\$\") or path'");
                 scriptLines.push("    \$luaContent += ''");
                 scriptLines.push("    \$luaContent += '    if rotations[filename] then'");
                 scriptLines.push("    \$luaContent += '        mp.set_property(\"video-rotate\", rotations[filename])'");
@@ -1982,36 +2025,6 @@
             projectFolders.sort((a, b) => a.name.localeCompare(b.name));
             allProjectFolders = projectFolders.map(p => ({ name: p.name, path: p.path }));
 
-            // If we have a root handle, we might need to populate allProjectFolders with ALL projects,
-            // not just the ones being rendered.
-            if (g_rootHandle) {
-                const fullProjectList = [];
-                async function scanForAllProjects(dirHandle, currentPath = '') {
-                    for await (const entry of dirHandle.values()) {
-                        if (entry.kind === 'directory') {
-                            const newPath = currentPath ? `${currentPath}\\${entry.name}` : entry.name;
-                            try {
-                                await findDirectoryHandleByName(entry, 'Edit Thumbnails');
-                                fullProjectList.push({ name: entry.name, path: newPath });
-                            } catch (e) {
-                                await scanForAllProjects(entry, newPath);
-                            }
-                        }
-                    }
-                }
-                await scanForAllProjects(g_rootHandle);
-
-                // Merge and deduplicate
-                const seenPaths = new Set(allProjectFolders.map(p => p.path));
-                fullProjectList.forEach(p => {
-                    if (!seenPaths.has(p.path)) {
-                        allProjectFolders.push(p);
-                        seenPaths.add(p.path);
-                    }
-                });
-                allProjectFolders.sort((a, b) => a.name.localeCompare(b.name));
-            }
-
             let isProject = false;
             try {
                 await findDirectoryHandleByName(currentDirHandle, 'Edit Thumbnails');
@@ -2041,6 +2054,7 @@
                     } catch (e) {}
                 }
             }
+
 
             if (projectFolders.length === 0) {
                 let msg = 'No "Edit Thumbnails" folders found in the selected directory or its subdirectories.';
@@ -2100,6 +2114,7 @@
                         console.warn(`Could not resolve path for ${project.name} relative to root.`);
                     }
                 }
+                await refreshAllProjectFolders();
             }
 
             const allImageLoadPromises = [];
@@ -2297,14 +2312,11 @@
                     rowHeader.style.marginTop = '10px';
                     rowHeader.style.borderBottom = 'none';
 
-                    rowHeader.appendChild(createDeleteCross(videoFile.name, project.path, videoFile.subfolder, rowDiv));
-
                     const rowHeaderText = document.createElement('span');
                     rowHeaderText.textContent = videoFile.name;
                     rowHeader.appendChild(rowHeaderText);
 
                     rowDiv.prepend(rowHeader);
-                    rowDiv.appendChild(createRowActionBar(videoFile.name, project.path, videoFile.subfolder, rowDiv));
                     const dateInfo = document.createElement('div');
                     dateInfo.className = 'date-info';
                     dateInfo.textContent = `Created: ${new Date(videoFile.lastModified).toLocaleString()}`;
@@ -2414,6 +2426,9 @@
                         img.src = url;
                         allImageLoadPromises.push(promise);
                     });
+
+                    thumbnailsContainer.appendChild(createDeleteCross(videoFile.name, project.path, videoFile.subfolder, rowDiv));
+                    rowDiv.appendChild(createRowActionBar(videoFile.name, project.path, videoFile.subfolder, rowDiv));
                 }
                  if (projectRows.length > 0) {
                     const hr = document.createElement('hr');
@@ -2433,6 +2448,7 @@
 
         async function renderScNewMode() {
             console.log("--- Starting renderScNewMode (v2) ---");
+            await refreshAllProjectFolders();
             thumbnailContainer.innerHTML = '';
             canvases.clear();
             shortcutSelections.clear();
@@ -2538,7 +2554,6 @@
                             rowHeader.style.fontSize = '1em';
                             rowHeader.style.marginTop = '10px';
                             rowHeader.style.borderBottom = 'none';
-                            rowHeader.appendChild(createDeleteCross(videoBaseName, subfolderName, '', rowDiv));
                             const rowHeaderText = document.createElement('span');
                             rowHeaderText.textContent = videoBaseName;
                             rowHeader.appendChild(rowHeaderText);
@@ -2600,6 +2615,7 @@
                                 img.src = url;
                                 allImageLoadPromises.push(promise);
                             });
+                            thumbnailsContainer.appendChild(createDeleteCross(videoBaseName, subfolderName, '', rowDiv));
                         }
                     }
                     header.textContent = `${subfolderName} (${projectVideoCount} ${projectVideoCount === 1 ? 'video' : 'videos'})`;
@@ -2686,6 +2702,7 @@
                         console.warn(`Could not resolve path for ${project.name} relative to root.`);
                     }
                 }
+                await refreshAllProjectFolders();
             }
 
             projectFolders.sort((a, b) => a.name.localeCompare(b.name));
@@ -2865,6 +2882,7 @@
                             createdObjectUrls.push(url);
                             img.src = url;
                         });
+                        thumbnailsContainer.appendChild(createDeleteCross('playlist_entry', project.path, video.subfolder, rowDiv));
                         updateRowUI(rowDiv, 'playlist_entry', project.path);
                         localStorage.setItem(`playlist-thumb-index-${project.path}`, index);
                     };
@@ -2900,13 +2918,11 @@
                     rowHeader.style.fontSize = '1em';
                     rowHeader.style.marginTop = '10px';
                     rowHeader.style.borderBottom = 'none';
-                    rowHeader.appendChild(createDeleteCross('playlist_entry', project.path, candidateVideos[currentIndex].subfolder, rowDiv));
                     const rowHeaderText = document.createElement('span');
                     rowHeaderText.textContent = 'Playlist Item';
                     rowHeader.appendChild(rowHeaderText);
 
                     rowDiv.prepend(rowHeader);
-                    rowDiv.appendChild(createRowActionBar('playlist_entry', project.path, candidateVideos[currentIndex].subfolder, rowDiv));
 
                     updateRowUI(rowDiv, 'playlist_entry', project.path);
 
@@ -3144,7 +3160,7 @@
             scriptLines.push("    \$luaContent += ''");
             scriptLines.push("    \$luaContent += '    mp.set_property(\"video-rotate\", 0)'");
             scriptLines.push("    \$luaContent += ''");
-            scriptLines.push("    \$luaContent += '    local filename = path:match(\"([^/\\\\\\\\]+)\$\") or path'");
+            scriptLines.push("    \$luaContent += '    local filename = path:match(\"([^/\\\\\\\\\\\\\\\\]+)\$\") or path'");
             scriptLines.push("    \$luaContent += ''");
             scriptLines.push("    \$luaContent += '    if rotations[filename] then'");
             scriptLines.push("    \$luaContent += '        mp.set_property(\"video-rotate\", rotations[filename])'");
